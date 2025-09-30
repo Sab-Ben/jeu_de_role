@@ -1,6 +1,6 @@
-package com.izinvest_common.decorator;
+package com.rpg.decorator;
 
-import com.izinvest_common.core.Character;
+import com.rpg.core.Character;
 
 /**
  * Adaptateur simple : wrap un Character "nu" en CharacterComponent.

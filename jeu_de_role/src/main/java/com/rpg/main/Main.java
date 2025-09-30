@@ -1,18 +1,18 @@
-package com.izinvest_common.main;
+package com.rpg.main;
 
 import java.util.List;
 import java.util.function.BiConsumer;
 
-import com.izinvest_common.builder.CharacterBuilder;
-import com.izinvest_common.core.Character;
-import com.izinvest_common.core.Party;
-import com.izinvest_common.dao.CharacterDAO;
-import com.izinvest_common.decorator.BaseComponent;
-import com.izinvest_common.decorator.CharacterComponent;
-import com.izinvest_common.decorator.FireResistance;
-import com.izinvest_common.decorator.Invisibility;
-import com.izinvest_common.decorator.Telepathy;
-import com.izinvest_common.settings.GameSettings;
+import com.rpg.builder.CharacterBuilder;
+import com.rpg.core.Character;
+import com.rpg.core.Party;
+import com.rpg.dao.CharacterDAO;
+import com.rpg.decorator.BaseComponent;
+import com.rpg.decorator.CharacterComponent;
+import com.rpg.decorator.FireResistance;
+import com.rpg.decorator.Invisibility;
+import com.rpg.decorator.Telepathy;
+import com.rpg.settings.GameSettings;
 
 public class Main {
 

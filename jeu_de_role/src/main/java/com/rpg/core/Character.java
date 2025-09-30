@@ -1,4 +1,4 @@
-package com.izinvest_common.core;
+package com.rpg.core;
 
 import java.util.ArrayList;
 import java.util.Collections;

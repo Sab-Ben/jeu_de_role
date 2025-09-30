@@ -1,4 +1,4 @@
-package com.izinvest_common.dao;
+package com.rpg.dao;
 
 import java.util.List;
 import java.util.Optional;

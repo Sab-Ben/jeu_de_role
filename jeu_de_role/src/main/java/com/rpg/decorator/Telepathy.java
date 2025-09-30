@@ -1,4 +1,4 @@
-package com.izinvest_common.decorator;
+package com.rpg.decorator;
 
 /**
  * Décorateur "Télépathie".

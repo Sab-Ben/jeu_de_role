@@ -1,6 +1,6 @@
-package com.izinvest_common.decorator;
+package com.rpg.decorator;
 
-import com.izinvest_common.core.Character;
+import com.rpg.core.Character;
 
 /**
  * Classe abstraite de décorateur :

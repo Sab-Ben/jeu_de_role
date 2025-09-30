@@ -1,9 +1,9 @@
-package com.izinvest_common.builder;
+package com.rpg.builder;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import com.izinvest_common.core.Character;
+import com.rpg.core.Character;
 
 /**
  * Pattern BUILDER : construction fluide d'un Character immuable.

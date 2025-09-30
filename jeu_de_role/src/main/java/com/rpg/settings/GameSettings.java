@@ -1,6 +1,6 @@
-package com.izinvest_common.settings;
+package com.rpg.settings;
 
-import com.izinvest_common.core.Character;
+import com.rpg.core.Character;
 
 /**
  * Singleton pour les règles globales du jeu.

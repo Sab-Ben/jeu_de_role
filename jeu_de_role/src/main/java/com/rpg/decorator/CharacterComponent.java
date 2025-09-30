@@ -1,6 +1,6 @@
-package com.izinvest_common.decorator;
+package com.rpg.decorator;
 
-import com.izinvest_common.core.Character;
+import com.rpg.core.Character;
 
 /**
  * Interface décorée : ce que les décorateurs peuvent enrichir.

@@ -1,4 +1,4 @@
-package com.izinvest_common.dao;
+package com.rpg.dao;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import com.izinvest_common.core.Character;
+import com.rpg.core.Character;
 
 /**
  * Implémentation simple en mémoire (HashMap) pour stocker des personnages.
