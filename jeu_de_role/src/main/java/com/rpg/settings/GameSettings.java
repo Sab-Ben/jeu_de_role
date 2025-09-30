@@ -38,5 +38,13 @@ public class GameSettings {
                 + c.getAttack() + c.getDefense();
         return sum <= maxStatPoints && c.getName() != null && !c.getName().isBlank();
     }
+
+    /** Nombre max de membres directs dans un GroupComposite. */
+    private int maxMembersPerGroup = 10;
+
+    public int getMaxMembersPerGroup() { return maxMembersPerGroup; }
+    public void setMaxMembersPerGroup(int maxMembersPerGroup) {
+        this.maxMembersPerGroup = Math.max(1, maxMembersPerGroup);
+    }
 }
 
