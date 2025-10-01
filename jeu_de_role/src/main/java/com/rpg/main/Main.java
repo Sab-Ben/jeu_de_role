@@ -1,170 +1,187 @@
 package com.rpg.main;
 
-import java.util.List;
-import java.util.function.BiConsumer;
-
-import com.rpg.builder.CharacterBuilder;
+import com.rpg.battle.Battle;
+import com.rpg.battle.SimpleDamageStrategy;
+import com.rpg.command.*;
+import com.rpg.composite.GroupComposite;
 import com.rpg.core.Character;
-import com.rpg.core.Party;
 import com.rpg.dao.CharacterDAO;
-import com.rpg.decorator.BaseComponent;
-import com.rpg.decorator.CharacterComponent;
-import com.rpg.decorator.FireResistance;
-import com.rpg.decorator.Invisibility;
-import com.rpg.decorator.Telepathy;
+import com.rpg.mvc.controller.GameController;
+import com.rpg.mvc.model.PartyModel;
+import com.rpg.mvc.view.ConsoleView;
+import com.rpg.observer.BattleLogObserver;
 import com.rpg.settings.GameSettings;
+import com.rpg.validation.ValidationResult;
+
+import java.util.Optional;
+import java.util.Scanner;
 
 public class Main {
 
     public static void main(String[] args) {
-
+        // --- Settings globaux ---
         GameSettings settings = GameSettings.getInstance();
-        settings.setMaxStatPoints(300); // on assouplit la règle pour la démo
+        settings.setMaxStatPoints(250);
+        settings.setMaxMembersPerGroup(10);
 
+        // --- DAO / Modèle / Vue / Contrôleur ---
         CharacterDAO dao = new CharacterDAO();
+        PartyModel model = new PartyModel("Armée Alpha");
+        ConsoleView view = new ConsoleView();
+        model.addObserver(view);
 
-        // Petite lambda utilitaire : sauvegarde si valide + logging
-        BiConsumer<String, Character> saveIfValid = (label, ch) -> {
-            if (settings.isValid(ch)) {
-                dao.save(ch);
-                System.out.println("OK  : " + label + " => " + ch);
-            } else {
-                System.out.println("ERREUR: " + label + " viole les règles (max=" + settings.getMaxStatPoints() + ")");
+        GameController ctrl = new GameController(dao, model, () -> settings);
+
+        // --- Root group ---
+        GroupComposite armee = model.getRoot();
+
+        // --- Menu interactif ---
+        Scanner sc = new Scanner(System.in);
+        boolean running = true;
+
+        while (running) {
+            System.out.println("\n=== MENU PRINCIPAL ===");
+            System.out.println("1. Créer un personnage");
+            System.out.println("2. Afficher tous les personnages");
+            System.out.println("3. Ajouter un personnage à un groupe");
+            System.out.println("4. Lancer un combat");
+            System.out.println("5. Rejouer la dernière séquence de combat");
+            System.out.println("0. Quitter");
+            System.out.print("Votre choix : ");
+
+            String choix = sc.nextLine();
+
+            switch (choix) {
+                case "1" -> {
+                    System.out.print("Nom du personnage : ");
+                    String name = sc.nextLine();
+
+                    System.out.print("Force : ");
+                    int str = Integer.parseInt(sc.nextLine());
+                    System.out.print("Agilité : ");
+                    int agi = Integer.parseInt(sc.nextLine());
+                    System.out.print("Intelligence : ");
+                    int intel = Integer.parseInt(sc.nextLine());
+                    System.out.print("Attaque : ");
+                    int atk = Integer.parseInt(sc.nextLine());
+                    System.out.print("Défense : ");
+                    int def = Integer.parseInt(sc.nextLine());
+
+                    // --- Création avec Builder ---
+                    ValidationResult result = ctrl.createAndSaveCharacter(b -> {
+                        b.setName(name)
+                                .setStrength(str)
+                                .setAgility(agi)
+                                .setIntelligence(intel)
+                                .setAttack(atk)
+                                .setDefense(def);
+
+                        // Boucle pour ajouter les équipements
+                        boolean ajoutEquipement = true;
+                        while (ajoutEquipement) {
+                            System.out.print("Ajouter un équipement (ou taper ENTER pour arrêter) : ");
+                            String equip = sc.nextLine();
+                            if (equip.isBlank()) {
+                                ajoutEquipement = false;
+                            } else {
+                                b.addEquipment(equip);
+                            }
+                        }
+                    });
+
+                    System.out.println("Résultat : " + result);
+                }
+
+
+                case "2" -> {
+                    System.out.println("\n== PERSONNAGES ENREGISTRÉS ==");
+                    dao.findAll().forEach(c ->
+                            System.out.println(c.getName() + " (Puissance=" + c.getPowerLevel() + ")"));
+
+                    System.out.println("\n== LISTE TRIEE DANS L'ARBORESCENCE ==");
+                    view.printSorted(armee, false);
+                }
+
+
+                case "3" -> {
+                    System.out.print("Nom du personnage à ajouter : ");
+                    String name = sc.nextLine();
+                    ctrl.addCharacterTo(armee, name);
+                }
+
+                case "4" -> {
+                    System.out.print("Nom du premier combattant : ");
+                    String n1 = sc.nextLine();
+                    System.out.print("Nom du second combattant : ");
+                    String n2 = sc.nextLine();
+
+                    Optional<Character> c1 = dao.findByName(n1);
+                    Optional<Character> c2 = dao.findByName(n2);
+
+                    if (c1.isPresent() && c2.isPresent()) {
+                        Battle battle = new Battle(c1.get(), c2.get(), new SimpleDamageStrategy());
+                        battle.addObserver(new BattleLogObserver());
+                        battle.addObserver(view);
+
+                        CommandHistory history = new CommandHistory();
+
+                        System.out.println("\n=== COMBAT TOUR PAR TOUR ===");
+                        boolean turnA = true; // alterne entre A et B
+
+                        while (!battle.isOver()) {
+                            Character activeChar = turnA ? battle.getUnitA().getCharacter() : battle.getUnitB().getCharacter();
+                            Character targetChar = turnA ? battle.getUnitB().getCharacter() : battle.getUnitA().getCharacter();
+
+                            System.out.println("\nTour de " + activeChar.getName() + " (HP=" +
+                                    (turnA ? battle.getUnitA().getHp() : battle.getUnitB().getHp()) + ")");
+                            System.out.println("Actions disponibles : 1=Attaquer, 2=Défendre, 3=Pouvoir");
+                            System.out.print("Choisir une action : ");
+                            String action = sc.nextLine();
+
+                            GameCommand cmd;
+                            switch (action) {
+                                case "1" -> cmd = new AttackCommand(battle, turnA ? battle.getUnitA() : battle.getUnitB(),
+                                        turnA ? battle.getUnitB() : battle.getUnitA());
+                                case "2" -> cmd = new DefendCommand(battle, turnA ? battle.getUnitA() : battle.getUnitB());
+                                case "3" -> cmd = new UsePowerCommand(battle, turnA ? battle.getUnitA() : battle.getUnitB(),
+                                        turnA ? battle.getUnitB() : battle.getUnitA());
+                                default -> {
+                                    System.out.println("Action invalide, attaque par défaut");
+                                    cmd = new AttackCommand(battle, turnA ? battle.getUnitA() : battle.getUnitB(),
+                                            turnA ? battle.getUnitB() : battle.getUnitA());
+                                }
+                            }
+
+                            history.push(cmd);
+                            cmd.execute();
+
+                            turnA = !turnA; // passe au joueur suivant
+                        }
+
+                        System.out.println("\n== FIN DU COMBAT ==");
+                        String winner = battle.winnerNameOrNull();
+                        System.out.println(winner != null ? "Vainqueur : " + winner : "Égalité !");
+                    } else {
+                        System.out.println("Un ou les deux personnages sont introuvables.");
+                    }
+                }
+
+
+
+                case "5" -> {
+                    // à stocker globalement si tu veux rejouer après un combat
+                    System.out.println("(TODO) Rejouer la séquence de combat");
+                }
+
+                case "0" -> {
+                    running = false;
+                    System.out.println("Au revoir !");
+                }
+
+                default -> System.out.println("Choix invalide.");
             }
-        };
-
-        // ---- Création des personnages via le BUILDER ----
-        Character chevalier = new CharacterBuilder()
-                .setName("Chevalier")
-                .setStrength(18).setAgility(12).setIntelligence(10)
-                .setAttack(20).setDefense(22)
-                .addEquipment("Épée longue").addEquipment("Bouclier").addEquipment("Armure de plates")
-                .build();
-
-        Character guerrier = new CharacterBuilder()
-                .setName("Guerrier")
-                .setStrength(20).setAgility(14).setIntelligence(8)
-                .setAttack(22).setDefense(16)
-                .addEquipment("Hache double").addEquipment("Casque de fer")
-                .build();
-
-        Character magicien = new CharacterBuilder()
-                .setName("Magicien")
-                .setStrength(8).setAgility(12).setIntelligence(24)
-                .setAttack(16).setDefense(10)
-                .addEquipment("Bâton runique").addEquipment("Grimoire ancien")
-                .build();
-
-        Character dragon = new CharacterBuilder()
-                .setName("Dragon")
-                .setStrength(28).setAgility(16).setIntelligence(14)
-                .setAttack(30).setDefense(26)
-                .addEquipment("Écailles légendaires")
-                .build();
-
-        Character zombi = new CharacterBuilder()
-                .setName("Zombi")
-                .setStrength(12).setAgility(6).setIntelligence(2)
-                .setAttack(10).setDefense(8)
-                .addEquipment("Mâchoires pourries")
-                .build();
-
-        Character robot = new CharacterBuilder()
-                .setName("Robot")
-                .setStrength(22).setAgility(10).setIntelligence(16)
-                .setAttack(24).setDefense(24)
-                .addEquipment("Blindage composite").addEquipment("Servo-moteurs")
-                .build();
-
-        Character ours = new CharacterBuilder()
-                .setName("Ours")
-                .setStrength(24).setAgility(12).setIntelligence(6)
-                .setAttack(18).setDefense(14)
-                .addEquipment("Griffes").addEquipment("Fourrure épaisse")
-                .build();
-
-        Character tigre = new CharacterBuilder()
-                .setName("Tigre")
-                .setStrength(20).setAgility(22).setIntelligence(8)
-                .setAttack(20).setDefense(12)
-                .addEquipment("Crocs affûtés").addEquipment("Pelage camouflé")
-                .build();
-
-        // ---- Persistance si valides ----
-        saveIfValid.accept("Chevalier", chevalier);
-        saveIfValid.accept("Guerrier", guerrier);
-        saveIfValid.accept("Magicien", magicien);
-        saveIfValid.accept("Dragon", dragon);
-        saveIfValid.accept("Zombi", zombi);
-        saveIfValid.accept("Robot", robot);
-        saveIfValid.accept("Ours", ours);
-        saveIfValid.accept("Tigre", tigre);
-
-        System.out.println("\n--- Application de capacités (Decorator) ---");
-        CharacterComponent chevalierCampe = new Invisibility(new BaseComponent(chevalier));
-        CharacterComponent magicienPsy = new Telepathy(new BaseComponent(magicien));
-        CharacterComponent dragonIgnifuge = new FireResistance(new BaseComponent(dragon));
-
-        System.out.println(chevalierCampe.getDescription() + " | Power=" + chevalierCampe.getPowerLevel());
-        System.out.println(magicienPsy.getDescription() + " | Power=" + magicienPsy.getPowerLevel());
-        System.out.println(dragonIgnifuge.getDescription() + " | Power=" + dragonIgnifuge.getPowerLevel());
-
-        // ---- Collections / Party ----
-        System.out.println("\n--- Équipe A (Chevalier, Magicien, Tigre) ---");
-        Party partyA = new Party();
-        partyA.add(chevalier);
-        partyA.add(magicien);
-        partyA.add(tigre);
-        partyA.sortByPowerDesc();
-        partyA.getMembers().forEach(System.out::println);
-        System.out.println("Puissance totale A = " + partyA.getTotalPower());
-
-        System.out.println("\n--- Équipe B (Guerrier, Dragon, Robot) ---");
-        Party partyB = new Party();
-        partyB.add(guerrier);
-        partyB.add(dragon);
-        partyB.add(robot);
-        partyB.sortByPowerDesc();
-        partyB.getMembers().forEach(System.out::println);
-        System.out.println("Puissance totale B = " + partyB.getTotalPower());
-
-        // ---- Tri global par nom ----
-        System.out.println("\n--- Tous les personnages triés par nom ---");
-        List<Character> all = dao.findAll();
-        all.sort((a,b) -> a.getName().compareToIgnoreCase(b.getName()));
-        all.forEach(System.out::println);
-
-        // ---- Mini simulation de combat ----
-        System.out.println("\n--- Duel: Chevalier vs Dragon ---");
-        simulateDuel(chevalier, dragon);
-
-        System.out.println("\n--- Duel: Magicien (Télépathie) vs Robot ---");
-        // Pour la simulation, on pourrait utiliser la puissance décorée pour une variante ;
-        // ici on reste sur l'objet "nu" (sans effet) pour illustrer.
-        simulateDuel(magicienPsy.getInner(), robot);
-    }
-
-    /**
-     * Simulation ultra-simple : 5 rounds max, à chaque round
-     * - dégâts = ATK + (AGI/4) - (DEF/2), minimum 1
-     * - points de vie virtuels = 100 au départ
-     */
-    private static void simulateDuel(Character a, Character b) {
-        int hpA = 100, hpB = 100;
-        for (int round = 1; round <= 5 && hpA > 0 && hpB > 0; round++) {
-            int dmgA = Math.max(1, a.getAttack() + (a.getAgility()/4) - (b.getDefense()/2));
-            int dmgB = Math.max(1, b.getAttack() + (b.getAgility()/4) - (a.getDefense()/2));
-            hpB -= dmgA;
-            hpA -= dmgB;
-            System.out.printf("Round %d: %s inflige %d | %s inflige %d | HP(%s)=%d, HP(%s)=%d%n",
-                    round, a.getName(), dmgA, b.getName(), dmgB, a.getName(), hpA, b.getName(), hpB);
         }
-        if (hpA == hpB) {
-            System.out.println("Résultat: Égalité !");
-        } else if (hpA > hpB) {
-            System.out.println("Vainqueur: " + a.getName());
-        } else {
-            System.out.println("Vainqueur: " + b.getName());
-        }
+
+        sc.close();
     }
 }
