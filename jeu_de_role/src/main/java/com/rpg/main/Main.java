@@ -13,7 +13,6 @@ import com.rpg.observer.BattleLogObserver;
 import com.rpg.settings.GameSettings;
 import com.rpg.validation.ValidationResult;
 
-// ✅ US 4.3 : imports pour l'enregistrement / replay depuis fichier
 import com.rpg.replay.ActionRecord;
 import com.rpg.replay.HistoryIO;
 
@@ -30,8 +29,8 @@ public class Main {
      * - 3) Composite : ajouter un personnage au groupe racine
      * - 4) Combat tour par tour (Command + Observer) -> enregistre l'historique en mémoire
      * - 5) Replay "en mémoire" du dernier combat (rejoue les mêmes commandes)
-     * - 6) 💾 Enregistrer le dernier combat dans un fichier texte (US 4.3)
-     * - 7) 📖 Charger un fichier texte et rejouer la séquence (US 4.3)
+     * - 6) Enregistrer le dernier combat dans un fichier texte (US 4.3)
+     * - 7) Charger un fichier texte et rejouer la séquence (US 4.3)
      */
     public static void main(String[] args) {
         // Pointeur vers le dernier historique de combat joué (en mémoire)
