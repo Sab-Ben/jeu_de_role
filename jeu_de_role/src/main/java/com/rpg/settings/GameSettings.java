@@ -13,7 +13,7 @@ public class GameSettings {
     private static final GameSettings INSTANCE = new GameSettings();
 
     /** Somme max autorisée pour STR+AGI+INT+ATK+DEF (ajustable). */
-    private int maxStatPoints = 250;
+    private int maxStatPoints = 350;
 
     private GameSettings() {}
 
