@@ -19,10 +19,14 @@ import java.util.Scanner;
 public class Main {
 
     public static void main(String[] args) {
+        CommandHistory lastHistory = null;
+
         // --- Settings globaux ---
         GameSettings settings = GameSettings.getInstance();
         settings.setMaxStatPoints(250);
         settings.setMaxMembersPerGroup(10);
+
+
 
         // --- DAO / Modèle / Vue / Contrôleur ---
         CharacterDAO dao = new CharacterDAO();
@@ -98,7 +102,8 @@ public class Main {
                     dao.findAll().forEach(c ->
                             System.out.println(c.getName() + " (Puissance=" + c.getPowerLevel() + ")"));
 
-                    System.out.println("\n== LISTE TRIEE DANS L'ARBORESCENCE ==");
+                    System.out.println("\n== ARMEE ALPHA" +
+                            " ==");
                     view.printSorted(armee, false);
                 }
 
@@ -161,6 +166,9 @@ public class Main {
                         System.out.println("\n== FIN DU COMBAT ==");
                         String winner = battle.winnerNameOrNull();
                         System.out.println(winner != null ? "Vainqueur : " + winner : "Égalité !");
+
+                        // Sauvegarde de l'historique global
+                        lastHistory = history;
                     } else {
                         System.out.println("Un ou les deux personnages sont introuvables.");
                     }
@@ -171,6 +179,12 @@ public class Main {
                 case "5" -> {
                     // à stocker globalement si tu veux rejouer après un combat
                     System.out.println("(TODO) Rejouer la séquence de combat");
+                    if (lastHistory == null) {
+                        System.out.println("Aucun combat n'a encore été joué.");
+                    } else {
+                        System.out.println("\n== REPLAY DU DERNIER COMBAT ==");
+                        lastHistory.replay();
+                    }
                 }
 
                 case "0" -> {
