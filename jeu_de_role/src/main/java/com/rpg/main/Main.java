@@ -204,12 +204,45 @@ public class Main {
                 }
 
                 case "5" -> {
-                    // === Replay "mémoire" du dernier combat ===
-                    if (lastHistory == null) {
+                    // == REPLAY MÉMOIRE sur un ÉTAT NEUF ==
+                    if (lastHistory == null || lastHistory.all().isEmpty()) {
                         System.out.println("Aucun combat n'a encore été joué.");
-                    } else {
-                        System.out.println("\n== REPLAY DU DERNIER COMBAT ==");
-                        lastHistory.replay();
+                        break;
+                    }
+
+                    try {
+                        // 1) On sérialise l'historique mémoire en records
+                        var records = com.rpg.replay.HistoryIO.fromHistory(lastHistory);
+
+                        // 2) On récupère les 2 noms de combattants présents dans ces records
+                        String[] names = extractTwoNames(records); // helper ci-dessous
+                        String nA = names[0], nB = names[1];
+
+                        var cA = dao.findByName(nA);
+                        var cB = dao.findByName(nB);
+                        if (cA.isEmpty() || cB.isEmpty()) {
+                            System.out.println("Personnage(s) introuvable(s) dans le DAO : " + java.util.Arrays.toString(names));
+                            System.out.println("Crée-les (menu 1) ou corrige les noms dans le fichier/records.");
+                            break;
+                        }
+
+                        // 3) On relance un Battle tout neuf
+                        Battle replay = new Battle(cA.get(), cB.get(), new SimpleDamageStrategy());
+                        replay.addObserver(new BattleLogObserver());
+                        replay.addObserver(view);
+
+                        // 4) On reconstruit des Command pour CE nouveau Battle et on exécute
+                        var cmds = com.rpg.replay.HistoryIO.toCommands(replay, records);
+                        System.out.println("\n== REPLAY DU DERNIER COMBAT (mémoire, état neuf) ==");
+                        for (var cmd : cmds) cmd.execute();
+
+                        if (replay.isOver()) {
+                            String w = replay.winnerNameOrNull();
+                            System.out.println("\n== FIN DU COMBAT (replay) ==");
+                            System.out.println(w == null ? "Égalité !" : "Vainqueur : " + w);
+                        }
+                    } catch (Exception ex) {
+                        System.out.println("Erreur pendant le replay mémoire : " + ex.getMessage());
                     }
                 }
 
@@ -278,7 +311,7 @@ public class Main {
                         }
 
                     } catch (Exception ex) {
-                        System.out.println("❌ Échec lecture/replay : " + ex.getMessage());
+                        System.out.println("Échec lecture/replay : " + ex.getMessage());
                     }
                 }
 
@@ -312,10 +345,25 @@ public class Main {
         try {
             var records = HistoryIO.fromHistory(history); // nécessite que les commandes implémentent RecordableCommand
             HistoryIO.save(Path.of(path), records);
-            System.out.println("✅ Historique enregistré dans " + path);
+            System.out.println("Historique enregistré dans " + path);
         } catch (Exception ex) {
-            System.out.println("❌ Échec sauvegarde : " + ex.getMessage());
+            System.out.println("Échec sauvegarde : " + ex.getMessage());
         }
+    }
+
+    /**
+     * Extrait exactement 2 noms de combattants depuis la liste de records.
+     * Garde l'ordre d'apparition (LinkedHashSet). Lève une erreur sinon.
+     */
+    private static String[] extractTwoNames(java.util.List<com.rpg.replay.ActionRecord> records) {
+        java.util.LinkedHashSet<String> set = new java.util.LinkedHashSet<>();
+        for (com.rpg.replay.ActionRecord r : records) {
+            if (r.getActor() != null && !r.getActor().isBlank()) set.add(r.getActor().trim());
+            if (r.getTarget() != null && !r.getTarget().isBlank()) set.add(r.getTarget().trim());
+        }
+        if (set.size() != 2)
+            throw new IllegalStateException("L'historique doit contenir exactement 2 combattants, trouvés: " + set);
+        return set.toArray(new String[0]);
     }
 }
 
