@@ -64,5 +64,21 @@ public class Battle extends Subject {
         return (unitA.getHp() > unitB.getHp()) ? unitA.getCharacter().getName()
                 : unitB.getCharacter().getName();
     }
+
+    /** Récupère l'unité par nom de personnage (insensible à la casse) — utile pour le replay fichier. */
+    public BattleUnit getUnitByName(String name) {
+        String n = name == null ? "" : name.trim();
+        if (unitA.getCharacter().getName().equalsIgnoreCase(n)) return unitA;
+        if (unitB.getCharacter().getName().equalsIgnoreCase(n)) return unitB;
+        throw new IllegalArgumentException("Aucun combattant ne se nomme '" + name + "'");
+    }
+
+    /** Utilitaire : renvoie l'adversaire direct de 'unit' dans ce duel. */
+    public BattleUnit opponentOf(BattleUnit unit) {
+        if (unit == unitA) return unitB;
+        if (unit == unitB) return unitA;
+        throw new IllegalArgumentException("Unit inconnue dans ce Battle");
+    }
+
 }
 
