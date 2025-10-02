@@ -1,27 +1,63 @@
 # Jeu De Role App
-Jeu de role's application that generates custom characters for a role-playing game. The
+Role-playing game application that generates customized characters for a role-playing game. The
 characters have basic characteristics and can be dynamically assigned special abilities.
 They are stored in a persistent system, and certain game rules are accessible
 globally.
 
 # Technical constraints (mandatory):
-Must use the following elements:
-• The Builder design pattern to create characters.
-• The Decorator design pattern to dynamically add special abilities.
-• The Singleton design pattern for global game configuration.
-• The DAO pattern to store and retrieve characters.
-• Collections to manage character groups.
-• Genericity to design a generic DAO.
+This application goes beyond a simple generator:
+o Advanced character creation and validation (Builder, Singleton, Chain of Responsibility).
+o Dynamically added abilities (Decorator).
+o Actions and combat (Command, Observer).
+o Organization into hierarchical armies/teams (Composite).
+o Persistence with generic DAO.
+o Minimal interface (console or Swing) in MVC.
 
-## Technologies
+# Authors
+Our code developer's squad: 
+- Litica AMANI
+- Sabrina BENSEGHIR
+- Julie CAUSSE 
+
+
+# Product Backlog : 
+## Épic 1 : Création et gestion des personnages
+• US 1.1 : En tant qu’utilisateur, je veux créer un personnage en choisissant ses caractéristiques
+(Builder) pour disposer d’une base jouable => Julie CAUSSE
+• US 1.2 : En tant qu’utilisateur, je veux ajouter ou retirer dynamiquement des capacités spéciales
+(Decorator) pour personnaliser mon personnage => Sabrina BENSEGHIR
+• US 1.3 : En tant qu’utilisateur, je veux stocker mes personnages et les retrouver plus tard (DAO) => Liticia AMANI 
+• US 1.4 : En tant qu’utilisateur, je veux pouvoir organiser mes personnages dans des groupes
+hiérarchisés (Composite → ex. une armée composée de plusieurs parties). => Liticia AMANI
+
+## Épic 2 : Gestion des règles du jeu et des actions
+• US 2.1 : En tant qu’utilisateur, je veux que les règles globales du jeu (limite de points de stats, max
+de personnages par groupe, etc.) soient centralisées et accessibles partout (Singleton). => Julie CAUSSE
+• US 2.2 : En tant qu’utilisateur, je veux déclencher des actions de jeu via des commandes (Command
+→ ex. attaquer, défendre, utiliser un pouvoir) pour simuler des tours de jeu. => Sabrina BENSEGHIR
+• US 2.3 : En tant qu’utilisateur, je veux qu’un système de validation applique des règles dans un
+enchaînement (Chain of Responsibility → ex. validation des points, validation du nom, validation
+des capacités). => Sabrina BENSEGHIR
+
+## Épic 3 : Interaction et affichage (MVC)
+• US 3.1 : En tant qu’utilisateur, je veux disposer d’une interface simple (console ou Swing) suivant le
+pattern MVC pour gérer mes personnages. => Sabrina BENSEGHIR
+• US 3.2 : En tant qu’utilisateur, je veux visualiser les personnages et leurs pouvoirs dans une liste
+triable (MVC + Observer). => Julie CAUSSE
+
+## Épic 4 : Combat et simulation
+• US 4.1 : En tant qu’utilisateur, je veux lancer un combat entre deux personnages pour comparer leurs
+niveaux de puissance (Command + Strategy optionnelle si tu veux aller plus loin). => Julie CAUSSE
+• US 4.2 : En tant qu’utilisateur, je veux observer l’évolution du combat (Observer → les spectateurs
+ou le journal de combat reçoivent les infos). => Liticia AMANI
+• US 4.3 : En tant qu’utilisateur, je veux pouvoir sauvegarder et rejouer une séquence d’actions
+(Command → historique/replay des actions). => Liticia AMANI
+
+
+# Technologies
 - Java 17+
 
-## Authors
-Our code developer's squad: 
-- Julie : which took charge of the builder and singleton design patterns 
-- Litica : which took charge of the DAO design pattern
-- Sabrina : which took charge of the decorator design pattern
 
-## Contribute to the project
+# Contribute to the project
 Jeu De Role App is available on github via the following link "https://github.com/Sab-Ben/jeu_de_role", 
 it must be clone with command line "git clone https://github.com/Sab-Ben/jeu_de_role".
