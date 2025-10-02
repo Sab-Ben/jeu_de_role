@@ -1,50 +1,51 @@
 package com.rpg.settings;
 
+import java.util.regex.Pattern;
 import com.rpg.core.Character;
 
 /**
- * Singleton pour les règles globales du jeu.
- * - Ici : limite sur la somme STR+AGI+INT+ATK+DEF
- * - Méthode isValid(Character) pour vérifier un perso
+ * Singleton contenant toutes les règles globales (évite les magic numbers).
  */
 public class GameSettings {
-
-    // Instance unique (instantiation EAGER pour simplicité)
     private static final GameSettings INSTANCE = new GameSettings();
+    public static GameSettings getInstance() { return INSTANCE; }
 
-    /** Somme max autorisée pour STR+AGI+INT+ATK+DEF (ajustable). */
-    private int maxStatPoints = 350;
+    // --- Validation personnage ---
+    private int maxStatPoints = 60;                   // STR+AGI+INT+ATK+DEF
+    private Pattern namePattern = Pattern.compile("^[\\p{L}0-9\\- ]{3,30}$");
 
-    private GameSettings() {}
+    // --- Combat ---
+    private int maxRounds = 50;                       // Cap de tours pour "stalemate"
+    private int basePowerInvisibility = 5;            // Bonus décorateur
+    private int defendBoost = 3;                      // DEF temporaire sur Defend
 
-    public static GameSettings getInstance() {
-        return INSTANCE;
-    }
+    // --- Composite ---
+    private int maxMembersPerGroup = 10;
 
-    public int getMaxStatPoints() {
-        return maxStatPoints;
-    }
+    private GameSettings(){}
 
-    public void setMaxStatPoints(int maxStatPoints) {
-        this.maxStatPoints = maxStatPoints;
-    }
+    public int getMaxStatPoints(){ return maxStatPoints; }
+    public void setMaxStatPoints(int v){ this.maxStatPoints = Math.max(1, v); }
 
-    /**
-     * Vérifie si le personnage respecte la règle de somme max + nom non vide.
-     */
+    public Pattern getNamePattern(){ return namePattern; }
+    public void setNamePattern(Pattern p){ this.namePattern = p; }
+
+    public int getMaxRounds(){ return maxRounds; }
+    public void setMaxRounds(int v){ this.maxRounds = Math.max(1, v); }
+
+    public int getBasePowerInvisibility(){ return basePowerInvisibility; }
+    public void setBasePowerInvisibility(int v){ this.basePowerInvisibility = Math.max(0, v); }
+
+    public int getDefendBoost(){ return defendBoost; }
+    public void setDefendBoost(int v){ this.defendBoost = Math.max(0, v); }
+
+    public int getMaxMembersPerGroup(){ return maxMembersPerGroup; }
+    public void setMaxMembersPerGroup(int v){ this.maxMembersPerGroup = Math.max(1, v); }
+
+    /** Validation minimale globale (optionnelle) */
     public boolean isValid(Character c) {
-        if (c == null) return false;
         int sum = c.getStrength() + c.getAgility() + c.getIntelligence()
                 + c.getAttack() + c.getDefense();
         return sum <= maxStatPoints && c.getName() != null && !c.getName().isBlank();
     }
-
-    /** Nombre max de membres directs dans un GroupComposite. */
-    private int maxMembersPerGroup = 10;
-
-    public int getMaxMembersPerGroup() { return maxMembersPerGroup; }
-    public void setMaxMembersPerGroup(int maxMembersPerGroup) {
-        this.maxMembersPerGroup = Math.max(1, maxMembersPerGroup);
-    }
 }
-
