@@ -37,7 +37,7 @@ public class Main {
 
         // --- Settings globaux ---
         GameSettings settings = GameSettings.getInstance();
-        settings.setMaxStatPoints(250);
+        settings.setMaxStatPoints(350);
         settings.setMaxMembersPerGroup(10);
 
         // --- DAO / Modèle / Vue / Contrôleur ---
