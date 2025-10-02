@@ -2,9 +2,10 @@ package com.rpg.command;
 
 import com.rpg.battle.Battle;
 import com.rpg.battle.BattleUnit;
+import com.rpg.replay.ActionRecord;
 
 /** Commande "défendre". */
-public class DefendCommand implements GameCommand {
+public class DefendCommand implements RecordableCommand {
     private final Battle battle;
     private final BattleUnit who;
 
@@ -15,5 +16,11 @@ public class DefendCommand implements GameCommand {
     @Override public void execute() { battle.defend(who); }
     @Override public void undo() { /* no-op dans cette version */ }
     @Override public String label() { return who.getCharacter().getName() + " se défend"; }
+
+    @Override
+    public ActionRecord toRecord() {
+        return new ActionRecord(ActionRecord.Type.DEFEND,
+                who.getCharacter().getName(), "");
+    }
 }
 
