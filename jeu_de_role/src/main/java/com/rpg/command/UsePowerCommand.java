@@ -17,6 +17,10 @@ public class UsePowerCommand implements RecordableCommand {
         this.battle = battle; this.caster = caster; this.target = target; this.chain = chain;
     }
 
+    public UsePowerCommand(Battle battle, BattleUnit caster, BattleUnit target) {
+        this(battle, caster, target, null); // fallback
+    }
+
     @Override
     public void execute() {
         // (ex) revalider contraintes (slots, somme de stats après buff, etc.)

@@ -66,8 +66,18 @@ public class ConsoleView implements Observer {
      * on affiche simplement le message. La vue est ainsi tenue à jour
      * quand le modèle ou le combat émettent des événements.
      */
+    // src/main/java/com/rpg/mvc/view/ConsoleView.java
     @Override
-    public void update(GameEvent event) {
-        System.out.println("[Vue] " + event.getMessage());
+    public void update(GameEvent e) {
+        switch (e.getType()) {
+            case ATTACK -> System.out.printf("[R%d] %s → %s (%d dmg, HP %s=%d)%n",
+                    e.getRound(), e.getActor(), e.getTarget(), e.getDamage(), e.getTarget(), e.getHpLeft());
+            case POWER  -> System.out.printf("[R%d] %s ⚡ %s (%d dmg, HP %s=%d)%n",
+                    e.getRound(), e.getActor(), e.getTarget(), e.getDamage(), e.getTarget(), e.getHpLeft());
+            case DEFEND -> System.out.printf("[R%d] %s se met en garde%n", e.getRound(), e.getActor());
+            case STALEMATE -> System.out.printf("[R%d] Stalemate: %s%n", e.getRound(), e.getWhat());
+            case MODEL_CHANGED -> System.out.println("[Model] " + e.getWhat());
+        }
     }
+
 }

@@ -2,6 +2,7 @@ package com.rpg.dao;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 /**
  * Interface DAO générique minimale.
@@ -10,8 +11,15 @@ import java.util.Optional;
  * - findAll()
  */
 public interface DAO<T> {
-    void save(T item);
-    Optional<T> findByName(String name);
+    void save(T item);                 // create
+    Optional<T> findById(UUID id);
     List<T> findAll();
+    void update(T item);               // update
+    void remove(UUID id);              // delete
+
+    // utilitaires
+    List<T> findAllSortedByName();
+    List<T> findAllSortedByPower();
+    List<T> searchByName(String q);
 }
 

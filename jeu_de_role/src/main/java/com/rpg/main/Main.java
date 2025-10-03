@@ -28,8 +28,8 @@ public class Main {
      * - 3) Composite : ajouter un personnage au groupe racine
      * - 4) Combat tour par tour (Command + Observer) -> enregistre l'historique en mémoire
      * - 5) Replay "en mémoire" du dernier combat (rejoue les mêmes commandes)
-     * - 6) Enregistrer le dernier combat dans un fichier texte (US 4.3)
-     * - 7) Charger un fichier texte et rejouer la séquence (US 4.3)
+     * - 6) Enregistrer le dernier combat dans un fichier texte
+     * - 7) Charger un fichier texte et rejouer la séquence
      */
     public static void main(String[] args) {
         // Pointeur vers le dernier historique de combat joué (en mémoire)
@@ -61,9 +61,9 @@ public class Main {
             System.out.println("2. Afficher tous les personnages");
             System.out.println("3. Ajouter un personnage à un groupe");
             System.out.println("4. Lancer un combat");
-            System.out.println("5. Rejouer la dernière séquence de combat (mémoire)");
-            System.out.println("6. Enregistrer la dernière séquence dans un fichier (US 4.3)");
-            System.out.println("7. Charger un fichier et rejouer (US 4.3)");
+            System.out.println("5. Rejouer la dernière séquence de combat ");
+            System.out.println("6. Enregistrer la dernière séquence dans un fichier ");
+            System.out.println("7. Charger un fichier et rejouer ");
             System.out.println("0. Quitter");
             System.out.print("Votre choix : ");
 
@@ -332,7 +332,7 @@ public class Main {
         try { return Integer.parseInt(s.trim()); } catch (Exception ignored) { return 0; }
     }
 
-    /** Demande un chemin et enregistre l'historique dans un fichier texte (US 4.3). */
+    /** Demande un chemin et enregistre l'historique dans un fichier texte . */
     private static void handleSaveHistoryInteractive(Scanner sc, CommandHistory history) {
         if (history == null || history.all().isEmpty()) {
             System.out.println("Historique vide.");
