@@ -1,31 +1,21 @@
+// src/main/java/com/rpg/decorator/CharacterDecorator.java
 package com.rpg.decorator;
 
 import com.rpg.core.Character;
 
 /**
- * Classe abstraite de décorateur :
- * - Délègue par défaut aux méthodes du composant décoré
- * - Les sous-classes n'ajoutent que la logique différentielle
+ * Décorateur de personnage empilable + accès au décoré.
+ * Implémente AbilityHook par défaut (no-op) pour que chaque décorateur puisse réagir.
  */
-public abstract class CharacterDecorator implements CharacterComponent {
+public abstract class CharacterDecorator implements CharacterComponent, AbilityHook {
     protected final CharacterComponent delegate;
 
-    protected CharacterDecorator(CharacterComponent delegate) {
-        this.delegate = delegate;
-    }
+    protected CharacterDecorator(CharacterComponent delegate) { this.delegate = delegate; }
 
-    @Override
-    public String getDescription() {
-        return delegate.getDescription();
-    }
+    /** Accès au décoré pour parcourir la pile. */
+    public CharacterComponent getDecorated() { return delegate; }
 
-    @Override
-    public int getPowerLevel() {
-        return delegate.getPowerLevel();
-    }
-
-    @Override
-    public Character getInner() {
-        return delegate.getInner();
-    }
+    @Override public String getDescription() { return delegate.getDescription(); }
+    @Override public int getPowerLevel() { return delegate.getPowerLevel(); }
+    @Override public Character getInner() { return delegate.getInner(); }
 }
